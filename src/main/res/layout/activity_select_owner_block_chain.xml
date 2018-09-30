@@ -20,11 +20,41 @@
     <Spinner
         android:id="@+id/spinner"
         android:layout_width="match_parent"
-        android:layout_height="130dp" />
+        android:layout_height="105dp" />
 
+    <EditText
+        android:id="@+id/ownerTaskData"
+        android:layout_width="match_parent"
+        android:layout_height="137dp"
+        android:ems="10"
+        android:hint="Enter Task Data Here"
+        android:inputType="textPersonName" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="138dp">
+
+        <TextView
+            android:id="@+id/messageTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Server Info" />
+    </ScrollView>
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/goToStartS"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Return" />
+        android:text="Start Taskchain" />
+
+    <Button
+        android:id="@+id/goToAddS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add to Taskchain" />
+
+    <Button
+        android:id="@+id/backToServer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back To Server" />
 </LinearLayout>

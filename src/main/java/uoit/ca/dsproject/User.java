@@ -3,10 +3,10 @@ package uoit.ca.dsproject;
 import java.util.ArrayList;
 
 public class User {
-    public static ArrayList<BlockChain> blockChains = null;
+    public static ArrayList<BlockChain> blockChains = new ArrayList<BlockChain>();
+    public static ArrayList<String> savedHashes = new ArrayList<String>();
 
     public static void startBlockChain(String task) {
-        blockChains = new ArrayList<BlockChain>();
         BlockChain newBlockChain = new BlockChain();
         newBlockChain.startBlock(task);
         blockChains.add(newBlockChain);
@@ -23,6 +23,14 @@ public class User {
             }
         }
         return null;
+    }
+    public static boolean findBlockChain(String hash) {
+        for (BlockChain bc : blockChains) {
+            if (hash == bc.getHash()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static String printBlockChain(BlockChain bc) {

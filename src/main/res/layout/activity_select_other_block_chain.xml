@@ -18,41 +18,71 @@
         android:text="Enter Hash" />
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/editHash"
         android:layout_width="match_parent"
-        android:layout_height="93dp"
+        android:layout_height="73dp"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Hash" />
+        android:hint="Hash"
+        android:inputType="textPersonName" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/textViewIp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Enter IP" />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/editIP"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="66dp"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="IP" />
+        android:hint="IP"
+        android:inputType="textPersonName" />
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select Taskchain" />
+        android:text="Saved Hashes" />
 
     <Spinner
         android:id="@+id/spinner"
         android:layout_width="match_parent"
-        android:layout_height="130dp" />
+        android:layout_height="54dp" />
 
-    <Button
-        android:id="@+id/button3"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="102dp">
+
+        <TextView
+            android:id="@+id/messageTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Server Info" />
+    </ScrollView>
+    <EditText
+        android:id="@+id/taskData"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="View Chain" />
+        android:ems="10"
+        android:hint="Enter Task Data Here"
+        android:inputType="textPersonName" />
+
+    <Button
+        android:id="@+id/goToStartC"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Taskchain" />
+
+    <Button
+        android:id="@+id/goToAddC"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add To Taskchain" />
+
+    <Button
+        android:id="@+id/backToClient"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back To Client" />
 </LinearLayout>
