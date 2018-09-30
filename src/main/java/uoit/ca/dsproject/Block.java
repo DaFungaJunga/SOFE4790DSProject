@@ -1,7 +1,9 @@
 package uoit.ca.dsproject;
 
 
+import java.net.UnknownHostException;
 import java.util.Date;
+import java.net.InetAddress;
 
 //Block represent a task
 public class Block{
@@ -13,6 +15,7 @@ public class Block{
     public String data;
     private long timeStamp;
     public int nonce;
+    public String ip;
 
     public String calculateHash() {
         String calculatedHash = StringUtil.applySha256(previousHash +Long.toString(timeStamp)+data);
@@ -21,10 +24,21 @@ public class Block{
 
 
     public Block(String data, String previousHash){
+        InetAddress inetAddress = null;
+        try {
+            inetAddress = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
         this.data = data;
         this.previousHash=previousHash;
         this.timeStamp = new Date().getTime();
         this.hash= calculateHash();
+        try {
+            this.ip = inetAddress.getHostAddress();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
 
     }
     //remove if unnecessary

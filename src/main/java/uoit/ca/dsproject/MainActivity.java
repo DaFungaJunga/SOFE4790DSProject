@@ -15,8 +15,10 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.net.InetAddress;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -27,13 +29,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Thread serverThread = null;
     public static final int SERVER_PORT = 3000;
     TextView messageTv;
+    InetAddress inetAddress;
+    String ip;
+
+    {
+        try {
+            inetAddress = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        try {
+            ip = inetAddress.getHostAddress();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
 
         messageTv = (TextView) findViewById(R.id.messageTv);
     }

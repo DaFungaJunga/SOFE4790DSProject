@@ -14,21 +14,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="Client" />
+        android:text="Client/Other Taskchain" />
 
     <Button
         android:id="@+id/connect_server"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="onClick"
-        android:text="Connect to server" />
+        android:text="Connect to server/Change to Connect to Taskchain" />
 
     <Button
         android:id="@+id/send_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="onClick"
-        android:text="Send Message to server" />
+        android:text="Send Message to server/ Change to add Taskchain" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -38,7 +38,7 @@
             android:id="@+id/messageTv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No Messages" />
+            android:text="Remove and transfer to view chain" />
     </ScrollView>
 
 
