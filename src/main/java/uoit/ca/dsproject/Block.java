@@ -10,12 +10,12 @@ public class Block{
 
     //List<User> users = new ArrayList<User>();
     //List<Timestamp> timestamps = new ArrayList<Timestamp>();
-    public String hash;
-    public String previousHash;
-    public String data;
+    private String hash;
+    private String previousHash;
+    private String data;
     private long timeStamp;
-    public int nonce;
-    public String ip;
+    private int nonce;
+    private String ip;
 
     public String calculateHash() {
         String calculatedHash = StringUtil.applySha256(previousHash +Long.toString(timeStamp)+data);
@@ -51,4 +51,15 @@ public class Block{
         System.out.print("Block Mined!!! :"+hash);
     }
 
+    public String getHash() {
+        return hash;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public String getPreviousHash() {
+        return previousHash;
+    }
 }

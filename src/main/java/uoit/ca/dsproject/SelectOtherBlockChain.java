@@ -11,17 +11,23 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class SelectOtherBlockChain extends AppCompatActivity implements View.OnClickListener{
@@ -39,7 +45,30 @@ public class SelectOtherBlockChain extends AppCompatActivity implements View.OnC
     Spinner spinner;
     EditText taskData;
     public static User clientTaskChains;
+    public static ArrayList<String> savedHashes;
+    public static void writeJson( BlockChain serverTaskchain){
+        try(Writer writer = new FileWriter("clientTaskchains")){
 
+            Gson gson = new GsonBuilder().create();
+            gson.toJson(serverTaskchain,writer);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void readJson(){
+        try(Reader reader = new FileReader("clientTaskchains")){
+            Gson gson = new GsonBuilder().create();
+            clientTaskChains =gson.fromJson(reader,User.class);
+        }catch (Exception e) {
+            clientTaskChains = new User();
+            e.printStackTrace();
+        }
+    }
+    public static void getAllHashes(){
+        clientTaskChains.getSavedHashes();
+        savedHashes = clientTaskChains.;
+    }
+    //need to restrict the saving of all server block chains, it is okay to send it all
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +78,8 @@ public class SelectOtherBlockChain extends AppCompatActivity implements View.OnC
         editIP = findViewById(R.id.editIP);
         spinner = findViewById(R.id.spinner);
         taskData = findViewById(R.id.taskData);
+
+        readJson();
     }
 
     public void updateMessage(final String message) {

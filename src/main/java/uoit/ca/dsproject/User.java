@@ -3,20 +3,20 @@ package uoit.ca.dsproject;
 import java.util.ArrayList;
 
 public class User {
-    public static ArrayList<BlockChain> blockChains = new ArrayList<BlockChain>();
-    public static ArrayList<String> savedHashes = new ArrayList<String>();
+    private ArrayList<BlockChain> blockChains = new ArrayList<BlockChain>();
+    private ArrayList<String> savedHashes = new ArrayList<String>();
 
-    public static void startBlockChain(String task) {
+    public void startBlockChain(String task) {
         BlockChain newBlockChain = new BlockChain();
         newBlockChain.startBlock(task);
         blockChains.add(newBlockChain);
     }
 
-    public static void addToBlockChain(String task, BlockChain newBlockChain) {
+    public void addToBlockChain(String task, BlockChain newBlockChain) {
         newBlockChain.continueBlock(task);
     }
 
-    public static BlockChain getBlockChain(String hash) {
+    public BlockChain getBlockChain(String hash) {
         for (BlockChain bc : blockChains) {
             if (hash == bc.getHash()) {
                 return bc;
@@ -24,7 +24,7 @@ public class User {
         }
         return null;
     }
-    public static boolean findBlockChain(String hash) {
+    public boolean findBlockChain(String hash) {
         for (BlockChain bc : blockChains) {
             if (hash == bc.getHash()) {
                 return true;
@@ -32,12 +32,19 @@ public class User {
         }
         return false;
     }
+    public void getSavedHashes() {
+        savedHashes = null;
+        for (BlockChain bc : blockChains) {
+            savedHashes.add(bc.getHash());
+        }
+    }
 
-    public static String printBlockChain(BlockChain bc) {
+
+    public String printBlockChain(BlockChain bc) {
         return bc.printBlocks();
     }
 
-    public static boolean replaceBlockChain(BlockChain newBC, String hash) {
+    public boolean replaceBlockChain(BlockChain newBC, String hash) {
         for (int i = 0; i < blockChains.size(); i++){
             if (hash == blockChains.get(i).getHash()) {
                 blockChains.set(i, newBC);
@@ -45,5 +52,8 @@ public class User {
             }
         }
         return false;
+    }
+    public ArrayList<String> returnSavedHashes(){
+        return savedHashes;
     }
 }

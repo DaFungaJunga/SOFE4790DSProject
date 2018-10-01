@@ -12,17 +12,23 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.net.InetAddress;
 
@@ -38,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView messageTv;
     InetAddress inetAddress;
     String ip;
+    public static ArrayList savedHashes;
     public static User serverTaskChains;
 
     {
@@ -52,13 +59,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
     }
-
+    public static void writeJson(User user){
+        try(Writer writer = new FileWriter("serverTaskchains.json")){
+            Gson gson = new GsonBuilder().create();
+            gson.toJson(user,writer);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void readJson(){
+        try(Reader reader = new FileReader("ServerTaskchains.json")){
+            Gson gson = new GsonBuilder().create();
+            serverTaskChains =gson.fromJson(reader,User.class);
+        }catch (Exception e) {
+            serverTaskChains = new User();
+            e.printStackTrace();
+        }
+    }
+    public static void getAllHashes(){
+        serverTaskChains.getSavedHashes();
+        savedHashes = serverTaskChains.returnSavedHashes();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        readJson();
+        getAllHashes();
   //use for viewChain
         messageTv = (TextView) findViewById(R.id.messageTv);
     }
@@ -92,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // Add to or start Taskchain
             Intent intentOwner = new Intent(MainActivity.this, SelectOwnerBlockChain.class);
             intentOwner.putExtra("taskchains", (Parcelable) serverTaskChains);
+            intentOwner.putExtra("saveHashes",savedHashes);
             startActivityForResult(intentOwner,REQ_CODE);
         }
         if (view.getId() == R.id.goToClient) {
@@ -177,6 +207,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     String read = input.readLine();
                     serverTaskChains = new Gson().fromJson(read,User.class);
+                    writeJson(serverTaskChains);
                     Log.i(TAG, "Message Received from Client : " + read);
 
                     if (null == read || "Disconnect".contentEquals(read)) {

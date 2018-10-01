@@ -6,7 +6,7 @@ import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 // Download gson.2.6.2.jar
 public class BlockChain{
-    public static ArrayList<Block> blockChain;
+    private static ArrayList<Block> blockChain;
 
     /*public static void main(String[] args){
         System.out.println("creating first block");
@@ -22,18 +22,18 @@ public class BlockChain{
         System.out.println(blockchainJson);
 
     }*/
-    public static Boolean validation(ArrayList<Block> blockChain){
+    public Boolean validation(ArrayList<Block> blockChain){
         Block currentBlock;
         Block previousBlock;
         for(int i=1;i<blockChain.size();i++){
             currentBlock= blockChain.get(i);
             previousBlock=blockChain.get(i-1);
 
-            if(!currentBlock.hash.equals(currentBlock.calculateHash())){
+            if(!currentBlock.getHash().equals(currentBlock.calculateHash())){
                 System.out.println("Current Hashes not equal");
                 return false;
             }
-            if(!previousBlock.hash.equals(currentBlock.previousHash)){
+            if(!previousBlock.getHash().equals(currentBlock.getPreviousHash())){
                 System.out.println("Previous Hashes not equal");
                 return false;
             }
@@ -41,24 +41,23 @@ public class BlockChain{
         }
         return true;
     }
-    public static void startBlock(String task){
+    public void startBlock(String task){
         blockChain = new ArrayList<Block>();
         blockChain.add(new Block(task,"0"));
     }
-    public static void continueBlock(String task){
+    public void continueBlock(String task){
         if (validation(blockChain)){
-            blockChain.add(new Block(task,blockChain.get(blockChain.size()-1).previousHash));
+            blockChain.add(new Block(task,blockChain.get(blockChain.size()-1).getPreviousHash()));
 
         }
         System.out.println("BLOCK NOT VALID");
     }
-    public static String printBlocks(){
-        String blockChainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockChain);
+    public String printBlocks(){
         //System.out.println("Chain=");
-        return blockChainJson;
+        return new GsonBuilder().setPrettyPrinting().create().toJson(blockChain);
     }
     public static String getHash(){
-        return blockChain.get(0).hash;
+        return blockChain.get(0).getPreviousHash();
     }
     //need to find other users
     //blockListener
