@@ -6,6 +6,9 @@ import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
 public class Sub {
+	/*
+	 * use add/remove sub
+	 */
 	ArrayList<String> subscriptions = new ArrayList<String>();
 	String host=null;
 	String port=null; 
@@ -82,7 +85,7 @@ public class Sub {
 		while (sscanf.hasMoreTokens()) {
             System.out.println(sscanf.nextToken(", "));
         }
-		String ack = "ACK";
+		String ack = "ACK"+ sub;
 		connectionReq.send(ack.getBytes(ZMQ.CHARSET), 0);
 		long endTime = System.currentTimeMillis();
 		System.out.println("Execution time: " + (endTime - startTime) + " milliseconds");
@@ -101,5 +104,6 @@ public class Sub {
 		connectionReq = getConnectionReq();
 		connectionReq.send(request.getBytes(ZMQ.CHARSET), 0);
 	}
+	
 
 }
