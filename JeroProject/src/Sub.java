@@ -47,7 +47,7 @@ public class Sub {
 			port ="5555";
 		}
 		try {
-			connectionReq = context.createSocket(SocketType.REP);
+			connectionReq = context.createSocket(SocketType.REQ);
             connectionReq.connect("tcp://localhost:5555");
 			return connectionReq;
 		}catch(Exception e){
@@ -90,7 +90,9 @@ public class Sub {
 		System.out.println("2");
 
 		if(connectionReq==null){
-			connectionReq = getConnectionReq(contextr);
+			connectionReq = contextr.createSocket(SocketType.REQ);
+            connectionReq.connect("tcp://localhost:5555");
+			//connectionReq = getConnectionReq(contextr);
 		}
 		System.out.println("3");
 

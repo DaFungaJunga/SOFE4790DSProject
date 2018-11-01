@@ -1,6 +1,9 @@
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-
+import java.security.Key;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
@@ -14,6 +17,7 @@ public class Pub {
 	String port=null; 
 	ZMQ.Socket connectionPub=null;
 	ZMQ.Socket connectionRep=null;
+	String key = null;
 	//ZContext context = new ZContext();
 	public void setHost(String h){
 		host = h;
@@ -131,12 +135,61 @@ public class Pub {
 		topic.add("0");//total deliveries
 		topics.add(topic);
 	}
+	public static String applySha256(String input){
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+            //Applies sha256 to our input,
+            byte[] hash = digest.digest(input.getBytes("UTF-8"));
+
+            StringBuffer hexString = new StringBuffer(); // This will contain hash as hexidecimal
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        }
+        catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+	public byte[] encrypt(String key, String text) {
+		byte[] encrypted = null;
+		try {
+			
+		Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+        encrypted = cipher.doFinal(text.getBytes());
+
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return encrypted;
+	}
+	public String decrypt(byte[]encrypted,String key) {
+		String decrypted = null;
+		try {
+		Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+		cipher.init(Cipher.DECRYPT_MODE, aesKey);
+        decrypted = new String(cipher.doFinal(encrypted));
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return decrypted;
+	}
 	public void recieveMessage(String pub,ZContext context){
 		try{
 			while (!Thread.currentThread().isInterrupted()) {
 	            String string = connectionRep.recvStr(0).trim();
 	            StringTokenizer sscanf = new StringTokenizer(string, " ");
 	            String str = sscanf.nextToken();
+	            if (str=="GET"){
+	            	
+	            }
 	            if (str=="ACK"){
 	            	System.out.println("Recieved ACK");
 	            	String sub = sscanf.nextToken();
