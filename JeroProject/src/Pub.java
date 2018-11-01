@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.List;
 import java.util.StringTokenizer;
 
 import org.zeromq.SocketType;
@@ -15,40 +14,31 @@ public class Pub {
 	String port=null; 
 	ZMQ.Socket connectionPub=null;
 	ZMQ.Socket connectionRep=null;
+	//ZContext context = new ZContext();
 	public void setHost(String h){
 		host = h;
 	}
 	public void setPort(String p){
 		port = p;
 	}
-	public ZMQ.Socket getConnectionPub(String pub){
-		if(host==null){
-			host = "*";
-		}
-		if(port ==null){
-			port ="5556";
-		}
-		try (ZContext context = new ZContext()) {
+	public ZMQ.Socket getConnectionPub(String pub,ZContext context){
+		try {
 			connectionPub = context.createSocket(SocketType.PUB);
-            connectionPub.connect("tcp://"+host+":"+port);
-            connectionPub.bind("ipc://"+pub);
-
+           // connectionPub.connect("tcp://"+host+":"+port);
+            connectionPub.connect("tcp://*:5556");
+            String ipc = "ipc://test";
+            //connectionPub.bind("ipc://"+pub);
+            connectionPub.bind(ipc);
 			return connectionPub;
 		}catch(Exception e){
 			e.printStackTrace();
 			return null;
 		}
 	}
-	public ZMQ.Socket getConnectionRep(){
-		if(host==null){
-			host = "*";
-		}
-		if(port ==null){
-			port ="5555";
-		}
-		try (ZContext context = new ZContext()) {
+	public ZMQ.Socket getConnectionRep(ZContext context){
+		try{
 			connectionPub = context.createSocket(SocketType.REP);
-            connectionPub.connect("tcp://"+host+":"+port);
+            connectionPub.connect("tcp://*:5555");
 			return connectionPub;
 		}catch(Exception e){
 			e.printStackTrace();
@@ -56,30 +46,78 @@ public class Pub {
 		}
 	}
 	public void publish(String pub,String info){
-		long startTime = System.currentTimeMillis();
+		try{
+		ZContext context = new ZContext();
 		if (connectionPub==null){
-			connectionPub = getConnectionPub(pub);
+			//connectionPub = getConnectionPub(pub,context);
+			connectionPub = context.createSocket(SocketType.PUB);
+	        // connectionPub.connect("tcp://"+host+":"+port);
+	        connectionPub.bind("tcp://*:5556");
+	        String ipc = "ipc://test";
+	        //connectionPub.bind("ipc://"+pub);
+	        connectionPub.bind(ipc);
 		}
-        connectionPub.send(info, 0);
-        long endTime = System.currentTimeMillis();
-		System.out.println("Execution time: " + (endTime - startTime) + " milliseconds");
+        while (!Thread.currentThread().isInterrupted()) {
+    		long startTime = System.nanoTime();
+    		String update = String.format(
+                    "%s %s", pub, info
+                );
+	        connectionPub.send(update, 0);
+	        long endTime = System.nanoTime();
+			System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+			Thread.sleep(1000);
+        }
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	public void publishWithAck(String pub,String info){
-		long startTime = System.currentTimeMillis();
+		try{
+		ZContext contextp = new ZContext();
+		ZContext contextr = new ZContext();
+		System.out.println("1");
 		if (connectionPub==null){
-			connectionPub = getConnectionPub(pub);
+			//connectionPub = getConnectionPub(pub,contextp);
+			connectionPub = contextp.createSocket(SocketType.PUB);
+	        // connectionPub.connect("tcp://"+host+":"+port);
+	        connectionPub.bind("tcp://*:5556");
+	        String ipc = "ipc://test";
+	        //connectionPub.bind("ipc://"+pub);
+	        connectionPub.bind(ipc);
 		}
+		System.out.println("2");
+
 		if (connectionRep==null){
-			connectionRep = getConnectionPub(pub);
+			//connectionRep = getConnectionPub(pub,contextr);
+			connectionRep = contextr.createSocket(SocketType.REP);
+            connectionRep.connect("tcp://*:5555");
 		}
-        connectionPub.send(info, 0);
-        addTopic(pub);
-        byte[] reply =connectionRep.recv(0);
-        long endTime = System.currentTimeMillis();
-        recieveMessage(pub);
-		System.out.println("Execution time: " + (endTime - startTime) + " milliseconds");
+		System.out.println("3");
+		new Thread(new Runnable() {
+		    @Override public void run() {
+		    	recieveMessage(pub,contextr);		        
+		    }
+		}).start();
+		while (!Thread.currentThread().isInterrupted()) {
+			long startTime = System.nanoTime();
+			String update = String.format(
+                    "%s %s", pub, info
+                );
+			//System.out.println("4");
+
+	        connectionPub.send(update, 0);
+	        addTopic(pub,contextr);
+			//System.out.println("5");
+
+	        long endTime = System.nanoTime();
+	        //recieveMessage(pub,contextr);
+			//System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+		}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
-	public void addTopic(String pub){
+	public void addTopic(String pub,ZContext context){
 		for(int i=0;i<topics.size();i++){
     		if(topics.get(i).get(0)==pub){
     			topics.get(i).set(2,String.valueOf(0));
@@ -93,13 +131,14 @@ public class Pub {
 		topic.add("0");//total deliveries
 		topics.add(topic);
 	}
-	public void recieveMessage(String pub){
+	public void recieveMessage(String pub,ZContext context){
 		try{
 			while (!Thread.currentThread().isInterrupted()) {
 	            String string = connectionRep.recvStr(0).trim();
 	            StringTokenizer sscanf = new StringTokenizer(string, " ");
 	            String str = sscanf.nextToken();
 	            if (str=="ACK"){
+	            	System.out.println("Recieved ACK");
 	            	String sub = sscanf.nextToken();
 	            	for(int i=0;i<topics.size();i++){
 	            		if(topics.get(i).get(0)==sub){
@@ -113,6 +152,7 @@ public class Pub {
 	            	}
 	            } 	
 	            if(str=="ADD"){
+	            	System.out.println("Recieved ADD");
 	            	String sub = sscanf.nextToken();
 	            	for(int i=0;i<topics.size();i++){
 	            		if(topics.get(i).get(0)==sub){
@@ -126,6 +166,7 @@ public class Pub {
 	            	}
 	            }
 	            if(str=="REMOVE"){
+	            	System.out.println("Recieved ADD");
 	            	String sub = sscanf.nextToken();
 	            	for(int i=0;i<topics.size();i++){
 	            		if(topics.get(i).get(0)==sub){
