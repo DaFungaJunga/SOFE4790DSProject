@@ -103,24 +103,43 @@ public class Sub {
 			String request = "GET ".concat(sub);
 			connectionReq.send(request.getBytes(ZMQ.CHARSET), 0);
 			System.out.println("3 part 2");
-			byte[] reply = connectionReq.recv(0); //Key in bytes
+			//byte[] keyBytes = connectionReq.recv(0);
 			System.out.println("3 part 3");
-			String key = new String(reply,ZMQ.CHARSET);
+			//String key = new String(keyBytes,ZMQ.CHARSET);
+			String key = connectionReq.recvStr(0).trim();
 			String encryptedSub = new String(encrypt(key,sub));
 			connectionSub.subscribe(encryptedSub.getBytes(ZMQ.CHARSET));
 			System.out.println("Encryption Key: "+key);
-			contextr.close();
 
 			 while (!Thread.currentThread ().isInterrupted ()){
 					System.out.println("4");
-					String string = connectionSub.recvStr(0).trim();
-					String decryptedString = decrypt(reply,string);
-					System.out.println("Decrypted String: "+decryptedString);
+					byte[] stringBytes = connectionSub.recv(0);
+					System.out.println(stringBytes);
+					String string = new String(stringBytes);
+					System.out.println(string);
+					System.out.println(stringBytes.toString());
+
 					System.out.println("5");
-					StringTokenizer sscanf = new StringTokenizer(string, " ");
-					while (sscanf.hasMoreTokens()) {
-			            System.out.println(sscanf.nextToken(", "));
-			        }
+					String[] arr = string.split(" ", 2);
+					String encryptedPub = arr[0].trim();
+					String encryptedInfo = arr[1].trim();
+					System.out.println(encryptedPub);
+					System.out.println("Before trim"+encryptedInfo);
+
+				    //encryptedInfo = encryptedInfo.replaceAll("^\\s+", "");
+
+					System.out.println("After trim"+encryptedInfo);
+
+						//String decryptedString = decrypt(keyBytes,key);
+						//System.out.println("Decrypted String: "+decryptedString);
+						//byte[] token = sscanf.nextToken().getBytes();
+						//System.out.println("token:"+token);
+					System.out.println(encryptedInfo.getBytes().length);
+					String decryptedString = decrypt(encryptedInfo.getBytes(),key);
+					System.out.println("Decrypted String: "+decryptedString);
+						
+			            //System.out.println(sscanf.nextToken(", "));
+			     
 					String ack = "ACK".concat(sub);
 					System.out.println("6");
 		
@@ -131,6 +150,7 @@ public class Sub {
 					System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
 			 	}
 				contexts.close();
+				contextr.close();
 			}catch(Exception e) {
 			 e.printStackTrace();
 		 }	

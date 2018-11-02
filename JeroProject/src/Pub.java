@@ -93,8 +93,9 @@ public class Pub {
 
 		String key = applySha256(pub);
 		String encryptedInfo = new String(encrypt(key,info));
+		String test = decrypt(encryptedInfo.getBytes(),key);
 		String encryptedPub = new String(encrypt(key,pub));
-		
+		System.out.println(encrypt(key,pub).length);
 		System.out.println("3");
         addTopic(pub,contextp,key);
         System.out.println(key);
@@ -112,7 +113,7 @@ public class Pub {
 			//System.out.println("4");
 
 	        connectionPub.send(update, 0);
-			//System.out.println("5");
+			System.out.println(update);
 
 	        long endTime = System.nanoTime();
 	        //recieveMessage(pub,contextr);
@@ -206,12 +207,15 @@ public class Pub {
     			System.out.println("received String:"+string);
 	            StringTokenizer sscanf = new StringTokenizer(string, " ");
 	            String str = sscanf.nextToken();
-	            if (str=="GET"){
+    			System.out.println("received Str:"+str);
+
+	            if (str.equals("GET")){
 	            	System.out.println("Recieved GET");
 	            	String sub = sscanf.nextToken();
+	    			System.out.println("received Str:"+sub);
 	            	String response = "NULL";
 	            	for(int i=0;i<topics.size();i++){
-	            		if(topics.get(i).get(0)==sub){
+	            		if(topics.get(i).get(0).equals(sub)){
 	            			int updateReadCount = Integer.valueOf(topics.get(i).get(2))+1;
 	            			int updateTotalCount = Integer.valueOf(topics.get(i).get(3))+1;
 	            			int updateSubscriberCount = Integer.valueOf(topics.get(i).get(1))+1;
@@ -226,13 +230,13 @@ public class Pub {
 	            		}
 	            	}
 	            	connectionRep.send(response.getBytes(ZMQ.CHARSET), 0);
-	                
+	            	System.out.println("Sending key "+response);
 	            }
-	            if (str=="ACK"){
+	            if (str.equals("ACK")){
 	            	System.out.println("Recieved ACK");
 	            	String sub = sscanf.nextToken();
 	            	for(int i=0;i<topics.size();i++){
-	            		if(topics.get(i).get(0)==sub){
+	            		if(topics.get(i).get(0).equals(sub)){
 	            			int updateReadCount = Integer.valueOf(topics.get(i).get(2))+1;
 	            			int updateTotalCount = Integer.valueOf(topics.get(i).get(3))+1;
 
@@ -242,11 +246,11 @@ public class Pub {
 	            		}
 	            	}
 	            } 	
-	            if(str=="ADD"){
+	            if(str.equals("ADD")){
 	            	System.out.println("Recieved ADD");
 	            	String sub = sscanf.nextToken();
 	            	for(int i=0;i<topics.size();i++){
-	            		if(topics.get(i).get(0)==sub){
+	            		if(topics.get(i).get(0).equals(sub)){
 	            			int updateCount = Integer.valueOf(topics.get(i).get(1))+1;
 	            			int updateTotalCount = Integer.valueOf(topics.get(i).get(3))+1;
 
@@ -256,11 +260,11 @@ public class Pub {
 	            		}
 	            	}
 	            }
-	            if(str=="REMOVE"){
+	            if(str.equals("REMOVE")){
 	            	System.out.println("Recieved ADD");
 	            	String sub = sscanf.nextToken();
 	            	for(int i=0;i<topics.size();i++){
-	            		if(topics.get(i).get(0)==sub){
+	            		if(topics.get(i).get(0).equals(sub)){
 	            			int updateCount = Integer.valueOf(topics.get(i).get(1))-1;
 	            			topics.get(i).set(2,String.valueOf(updateCount));
 	            			return;
