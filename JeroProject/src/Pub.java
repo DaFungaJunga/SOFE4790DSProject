@@ -10,14 +10,14 @@ import org.zeromq.ZMQ;
 
 public class Pub { 
 	/*	
-	 *   topics:      0:topic name 1: subscribers count 2: current publication acknowledgement count 3: Total Deliveries
+	 *   topics: 0:topic name, 1: subscribers count, 2: current publication acknowledgement count, 
+	 *   3: Total Deliveries,  4:key
 	 */
 	ArrayList<ArrayList<String>> topics = new ArrayList<ArrayList<String>>();
 	String host=null;
 	String port=null; 
 	ZMQ.Socket connectionPub=null;
 	ZMQ.Socket connectionRep=null;
-	String key = null;
 	//ZContext context = new ZContext();
 	public void setHost(String h){
 		host = h;
@@ -71,14 +71,14 @@ public class Pub {
 			System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
 			Thread.sleep(1000);
         }
+        context.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
-	public void publishWithAck(String pub,String info){
+	public void publishEncrypted(String pub,String info){
 		try{
 		ZContext contextp = new ZContext();
-		ZContext contextr = new ZContext();
 		System.out.println("1");
 		if (connectionPub==null){
 			//connectionPub = getConnectionPub(pub,contextp);
@@ -91,37 +91,40 @@ public class Pub {
 		}
 		System.out.println("2");
 
-		if (connectionRep==null){
-			//connectionRep = getConnectionPub(pub,contextr);
-			connectionRep = contextr.createSocket(SocketType.REP);
-            connectionRep.connect("tcp://*:5555");
-		}
+		String key = applySha256(pub);
+		String encryptedInfo = new String(encrypt(key,info));
+		String encryptedPub = new String(encrypt(key,pub));
+		
 		System.out.println("3");
+        addTopic(pub,contextp,key);
+        System.out.println(key);
 		new Thread(new Runnable() {
 		    @Override public void run() {
-		    	recieveMessage(pub,contextr);		        
+		    	recieveMessage(pub);		        
 		    }
 		}).start();
+
 		while (!Thread.currentThread().isInterrupted()) {
 			long startTime = System.nanoTime();
 			String update = String.format(
-                    "%s %s", pub, info
+                    "%s %s", encryptedPub, encryptedInfo
                 );
 			//System.out.println("4");
 
 	        connectionPub.send(update, 0);
-	        addTopic(pub,contextr);
 			//System.out.println("5");
 
 	        long endTime = System.nanoTime();
 	        //recieveMessage(pub,contextr);
 			//System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+			Thread.sleep(1000);
 		}
+		contextp.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
-	public void addTopic(String pub,ZContext context){
+	public void addTopic(String pub,ZContext context,String key){
 		for(int i=0;i<topics.size();i++){
     		if(topics.get(i).get(0)==pub){
     			topics.get(i).set(2,String.valueOf(0));
@@ -133,6 +136,8 @@ public class Pub {
 		topic.add("0"); //subscriber count
 		topic.add("0");//current publication acknowledgement count
 		topic.add("0");//total deliveries
+		topic.add(key);;//key
+		
 		topics.add(topic);
 	}
 	public static String applySha256(String input){
@@ -144,7 +149,9 @@ public class Pub {
             byte[] hash = digest.digest(input.getBytes("UTF-8"));
 
             StringBuffer hexString = new StringBuffer(); // This will contain hash as hexidecimal
-            for (int i = 0; i < hash.length; i++) {
+            //for (int i = 0; i < hash.length; i++) {
+            for (int i = 0; i < 16; i++) {
+
                 String hex = Integer.toHexString(0xff & hash[i]);
                 if(hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
@@ -181,14 +188,45 @@ public class Pub {
 		}
 		return decrypted;
 	}
-	public void recieveMessage(String pub,ZContext context){
+	public void recieveMessage(String pub){
+		/*	
+		 *   topics: 0:topic name, 1: subscribers count, 2: current publication acknowledgement count, 
+		 *   3: Total Deliveries,  4:key
+		 */
 		try{
+			ZContext contextr = new ZContext();
+
+			//connectionRep = getConnectionPub(pub,contextr);
+			connectionRep = contextr.createSocket(SocketType.REP);
+	        connectionRep.bind("tcp://*:5555");
 			while (!Thread.currentThread().isInterrupted()) {
-	            String string = connectionRep.recvStr(0).trim();
+    			System.out.println("waiting to recieve message");
+	            byte[] byteString = connectionRep.recv(0);
+	            String string = new String(byteString);
+    			System.out.println("received String:"+string);
 	            StringTokenizer sscanf = new StringTokenizer(string, " ");
 	            String str = sscanf.nextToken();
 	            if (str=="GET"){
-	            	
+	            	System.out.println("Recieved GET");
+	            	String sub = sscanf.nextToken();
+	            	String response = "NULL";
+	            	for(int i=0;i<topics.size();i++){
+	            		if(topics.get(i).get(0)==sub){
+	            			int updateReadCount = Integer.valueOf(topics.get(i).get(2))+1;
+	            			int updateTotalCount = Integer.valueOf(topics.get(i).get(3))+1;
+	            			int updateSubscriberCount = Integer.valueOf(topics.get(i).get(1))+1;
+	            			
+	            			topics.get(i).set(2,String.valueOf(updateReadCount));
+	            			topics.get(i).set(3,String.valueOf(updateTotalCount));
+	            			topics.get(i).set(1,String.valueOf(updateSubscriberCount));
+	            			
+	            			String key = topics.get(i).get(4);
+	            			
+	            			response = key;
+	            		}
+	            	}
+	            	connectionRep.send(response.getBytes(ZMQ.CHARSET), 0);
+	                
 	            }
 	            if (str=="ACK"){
 	            	System.out.println("Recieved ACK");
@@ -232,6 +270,7 @@ public class Pub {
 	            System.out.println( "Received " + string);
 	            Thread.sleep(1000); //  Do some 'work'
 	        }
+			contextr.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
