@@ -4,6 +4,8 @@ import java.util.StringTokenizer;
 import java.security.Key;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
@@ -118,7 +120,7 @@ public class Pub {
 	        long endTime = System.nanoTime();
 	        //recieveMessage(pub,contextr);
 			//System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
-			Thread.sleep(1000);
+			Thread.sleep(10000);
 		}
 		contextp.close();
 		}catch(Exception e){
@@ -165,25 +167,27 @@ public class Pub {
     }
 	public byte[] encrypt(String key, String text) {
 		byte[] encrypted = null;
+		byte[] encryptedByteValue = null;
 		try {
 			
 		Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, aesKey);
         encrypted = cipher.doFinal(text.getBytes());
-
+        encryptedByteValue = new Base64().encode(encrypted);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		return encrypted;
+		return encryptedByteValue;
 	}
 	public String decrypt(byte[]encrypted,String key) {
 		String decrypted = null;
 		try {
+			byte[] decodedValue=new Base64().decode(encrypted);
 		Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
 		cipher.init(Cipher.DECRYPT_MODE, aesKey);
-        decrypted = new String(cipher.doFinal(encrypted));
+        decrypted = new String(cipher.doFinal(decodedValue));
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -242,7 +246,7 @@ public class Pub {
 
 	            			topics.get(i).set(2,String.valueOf(updateReadCount));
 	            			topics.get(i).set(3,String.valueOf(updateTotalCount));
-	            			return;
+	    	            	connectionRep.send("CON".getBytes(ZMQ.CHARSET), 0);
 	            		}
 	            	}
 	            } 	
@@ -256,7 +260,6 @@ public class Pub {
 
 	            			topics.get(i).set(2,String.valueOf(updateCount));
 	            			topics.get(i).set(3,String.valueOf(updateTotalCount));
-	            			return;
 	            		}
 	            	}
 	            }
@@ -267,7 +270,6 @@ public class Pub {
 	            		if(topics.get(i).get(0).equals(sub)){
 	            			int updateCount = Integer.valueOf(topics.get(i).get(1))-1;
 	            			topics.get(i).set(2,String.valueOf(updateCount));
-	            			return;
 	            		}
 	            	}
 	            }

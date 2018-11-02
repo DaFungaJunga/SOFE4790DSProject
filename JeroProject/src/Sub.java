@@ -5,6 +5,7 @@ import java.util.StringTokenizer;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.codec.binary.Base64;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
@@ -114,21 +115,21 @@ public class Sub {
 			 while (!Thread.currentThread ().isInterrupted ()){
 					System.out.println("4");
 					byte[] stringBytes = connectionSub.recv(0);
-					System.out.println(stringBytes);
+					//System.out.println(stringBytes);
 					String string = new String(stringBytes);
-					System.out.println(string);
-					System.out.println(stringBytes.toString());
+					//System.out.println(string);
+					//System.out.println(stringBytes.toString());
 
 					System.out.println("5");
 					String[] arr = string.split(" ", 2);
 					String encryptedPub = arr[0].trim();
 					String encryptedInfo = arr[1].trim();
 					System.out.println(encryptedPub);
-					System.out.println("Before trim"+encryptedInfo);
+					//System.out.println("Before trim"+encryptedInfo);
 
 				    //encryptedInfo = encryptedInfo.replaceAll("^\\s+", "");
 
-					System.out.println("After trim"+encryptedInfo);
+					//System.out.println("After trim"+encryptedInfo);
 
 						//String decryptedString = decrypt(keyBytes,key);
 						//System.out.println("Decrypted String: "+decryptedString);
@@ -140,12 +141,12 @@ public class Sub {
 						
 			            //System.out.println(sscanf.nextToken(", "));
 			     
-					String ack = "ACK".concat(sub);
+					String ack = "ACK ".concat(sub);
 					System.out.println("6");
 		
 					connectionReq.send(ack.getBytes(ZMQ.CHARSET), 0);
-					System.out.println("7");
-		
+					System.out.println(connectionReq.recv(0));
+						
 					long endTime = System.nanoTime();
 					System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
 			 	}
@@ -170,25 +171,27 @@ public class Sub {
 	}
 	public byte[] encrypt(String key, String text) {
 		byte[] encrypted = null;
+		byte[] encryptedByteValue = null;
 		try {
 			
 		Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, aesKey);
         encrypted = cipher.doFinal(text.getBytes());
-
+        encryptedByteValue = new Base64().encode(encrypted);
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		return encrypted;
+		return encryptedByteValue;
 	}
 	public String decrypt(byte[]encrypted,String key) {
 		String decrypted = null;
 		try {
+			byte[] decodedValue=new Base64().decode(encrypted);
 		Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
 		cipher.init(Cipher.DECRYPT_MODE, aesKey);
-        decrypted = new String(cipher.doFinal(encrypted));
+        decrypted = new String(cipher.doFinal(decodedValue));
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
