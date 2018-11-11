@@ -34,6 +34,14 @@ public class PubSubUI extends JFrame {
 	private JTextField txtTopic;
 	private JTextField txtHost;
 	private JTextField txtPort;
+	ZContext contextp;
+	ZContext contextpe;
+	
+	ZContext contextr=null;
+	ZContext contexts =null;
+	
+	ZContext contextse =null;
+	ZContext contextre =null;
 	
 	PubSubUI frame;
 	
@@ -97,17 +105,17 @@ public class PubSubUI extends JFrame {
 	}
 	public void publish(String pub,String info){
 		try{
-		ZContext context = new ZContext();
 		if (connectionPub==null){
+			contextp = new ZContext();
 			//connectionPub = getConnectionPub(pub,context);
-			connectionPub = context.createSocket(SocketType.PUB);
+			connectionPub = contextp.createSocket(SocketType.PUB);
 	        // connectionPub.connect("tcp://"+host+":"+port);
 	        connectionPub.bind("tcp://*:5556");
 	        String ipc = "ipc://test";
 	        //connectionPub.bind("ipc://"+pub);
 	        connectionPub.bind(ipc);
 		}
-        while (!Thread.currentThread().isInterrupted()) {
+       // while (!Thread.currentThread().isInterrupted()) {
     		long startTime = System.nanoTime();
     		String update = String.format(
                     "%s %s", pub, info
@@ -116,23 +124,24 @@ public class PubSubUI extends JFrame {
     		textAreaPub_1.setText(textAreaPub_1.getText() + update);
 	        connectionPub.send(update, 0);
 	        long endTime = System.nanoTime();
-	        textAreaPub_1.setText(textAreaPub_1.getText() + "Execution time: " + (endTime - startTime) + " nanoseconds");
+	        textAreaPub_1.setText(textAreaPub_1.getText() + "Execution time: " + (endTime - startTime) + " nanoseconds\n");
 	        System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
 	        textAreaPub_1.revalidate();textAreaPub_1.repaint();
 	        repaint();
 			Thread.sleep(1000);
-        }
-        context.close();
+       // }
+       // context.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 	public void publishEncrypted(String pub,String info){
 		try{
-		ZContext contextp = new ZContext();
 		if (connectionPub==null){
+			contextpe = new ZContext();
+
 			//connectionPub = getConnectionPub(pub,contextp);
-			connectionPub = contextp.createSocket(SocketType.PUB);
+			connectionPub = contextpe.createSocket(SocketType.PUB);
 	        // connectionPub.connect("tcp://"+host+":"+port);
 	        connectionPub.bind("tcp://*:5556");
 	        String ipc = "ipc://test";
@@ -144,12 +153,12 @@ public class PubSubUI extends JFrame {
 		String encryptedInfo = new String(encrypt(key,info));
 		String test = decrypt(encryptedInfo.getBytes(),key);
 		String encryptedPub = new String(encrypt(key,pub));
-		textAreaPub_1.setText(textAreaPub_1.getText() +encrypt(key,pub).length);
+		textAreaPub_1.setText(textAreaPub_1.getText() +encrypt(key,pub).length+"\n");
 		System.out.println(encrypt(key,pub).length);
 
         //revalidate();repaint();
-        addTopic(pub,contextp,key);
-        textAreaPub_1.setText(textAreaPub_1.getText() +key);
+        addTopic(pub,contextpe,key);
+        textAreaPub_1.setText(textAreaPub_1.getText() +key+"\n");
         //revalidate();repaint();
 		new Thread(new Runnable() {
 		    @Override public void run() {
@@ -157,7 +166,7 @@ public class PubSubUI extends JFrame {
 		    }
 		}).start();
 
-		while (!Thread.currentThread().isInterrupted()) {
+		//while (!Thread.currentThread().isInterrupted()) {
 			long startTime = System.nanoTime();
 			String update = String.format(
                     "%s %s", encryptedPub, encryptedInfo
@@ -165,7 +174,7 @@ public class PubSubUI extends JFrame {
 			//System.out.println("4");
 
 	        connectionPub.send(update, 0);
-	        textAreaPub_1.setText(textAreaPub_1.getText() +update);
+	        textAreaPub_1.setText(textAreaPub_1.getText() +update+"\n");
 	        System.out.println(update);
 	         //revalidate();repaint();
 
@@ -174,8 +183,8 @@ public class PubSubUI extends JFrame {
 	        //recieveMessage(pub,contextr);
 			//System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
 			Thread.sleep(10000);
-		}
-		contextp.close();
+		//}
+		//contextp.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -252,31 +261,33 @@ public class PubSubUI extends JFrame {
 		 *   3: Total Deliveries,  4:key
 		 */
 		try{
-			ZContext contextr = new ZContext();
+			if (contextr==null) {
+			contextr = new ZContext();
+			}
 
 			//connectionRep = getConnectionPub(pub,contextr);
 			connectionRep = contextr.createSocket(SocketType.REP);
 	        connectionRep.bind("tcp://*:5555");
 			while (!Thread.currentThread().isInterrupted()) {
-				textAreaPub_1.setText(textAreaPub_1.getText() +"waiting to recieve message");
+				textAreaPub_1.setText(textAreaPub_1.getText() +"waiting to recieve message"+"\n");
 	            System.out.println("waiting to recieve message");
 	            byte[] byteString = connectionRep.recv(0);
 	            String string = new String(byteString);
-	            textAreaPub_1.setText(textAreaPub_1.getText() +"received String:"+string);
+	            textAreaPub_1.setText(textAreaPub_1.getText() +"received String:"+string+"\n");
 	            System.out.println("received String:"+string);
 		         //revalidate();repaint();
 	            StringTokenizer sscanf = new StringTokenizer(string, " ");
 	            String str = sscanf.nextToken();
-	            textAreaPub_1.setText(textAreaPub_1.getText() +"received Str:"+str);
+	            textAreaPub_1.setText(textAreaPub_1.getText() +"received Str:"+str+"\n");
 	            System.out.println("received Str:"+str);
 		         //revalidate();repaint();
 
 	            if (str.equals("GET")){
-	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Recieved GET");
+	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Recieved GET"+"\n");
 	            	System.out.println("Recieved GET");
 			         //revalidate();repaint();
 	            	String sub = sscanf.nextToken();
-	            	textAreaPub_1.setText(textAreaPub_1.getText() +"received Str:"+sub);
+	            	textAreaPub_1.setText(textAreaPub_1.getText() +"received Str:"+sub+"\n");
 	            	System.out.println("received Str:"+sub);
 			        // revalidate();repaint();
 
@@ -297,12 +308,12 @@ public class PubSubUI extends JFrame {
 	            		}
 	            	}
 	            	connectionRep.send(response.getBytes(ZMQ.CHARSET), 0);
-	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Sending key "+response);
+	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Sending key "+response+"\n");
 	            	System.out.println("Sending key "+response);
 			         //revalidate();repaint();
 	            }
 	            if (str.equals("ACK")){
-	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Recieved ACK");
+	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Recieved ACK"+"\n");
 	            	System.out.println("Recieved ACK");
 			         //revalidate();repaint();
 
@@ -319,7 +330,7 @@ public class PubSubUI extends JFrame {
 	            	}
 	            } 	
 	            if(str.equals("ADD")){
-	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Recieved ADD");
+	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Recieved ADD"+"\n");
 	            	System.out.println("Recieved ADD");
 			         //revalidate();repaint();
 	            	String sub = sscanf.nextToken();
@@ -334,7 +345,7 @@ public class PubSubUI extends JFrame {
 	            	}
 	            }
 	            if(str.equals("REMOVE")){
-	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Recieved Remove");
+	            	textAreaPub_1.setText(textAreaPub_1.getText() +"Recieved Remove"+"\n");
 	            	System.out.println("Recieved Remove");
 			         //revalidate();repaint();
 	            	String sub = sscanf.nextToken();
@@ -345,12 +356,12 @@ public class PubSubUI extends JFrame {
 	            		}
 	            	}
 	            }
-	            textAreaPub_1.setText(textAreaPub_1.getText() + "Received " + string);
+	            textAreaPub_1.setText(textAreaPub_1.getText() + "Received " + string+"\n");
 	            System.out.println( "Received " + string);
-		         //revalidate();repaint();
+		         revalidate();repaint();
 	            Thread.sleep(1000); //  Do some 'work'
 	        }
-			contextr.close();
+			//contextr.close();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -395,30 +406,29 @@ public class PubSubUI extends JFrame {
 	}
 	public void getSubscription(String sub){
 		try{
-			ZContext context = new ZContext();
 			if (connectionSub==null){
-				connectionSub = getConnectionSub(context);
+				contexts = new ZContext();
+				connectionSub = getConnectionSub(contexts);
 				
 			}
 			connectionSub.subscribe(sub.getBytes(ZMQ.CHARSET));
-            while (!Thread.currentThread ().isInterrupted ()) {
-            	System.out.println("in while loop");
-    			long startTime = System.nanoTime();
+            //while (!Thread.currentThread ().isInterrupted ()) {
             	String string = connectionSub.recvStr(0).trim();
-            	textAreaSub_1.setText(textAreaSub_1.getText() +"received String:"+string);
+    			long startTime = System.nanoTime();
+            	textAreaSub_1.setText(textAreaSub_1.getText() +"received String:"+string+"\n");
             	System.out.println("received String:"+string);
 		         //revalidate();repaint();
     			StringTokenizer sscanf = new StringTokenizer(string, " ");
     			while (sscanf.hasMoreTokens()) {
     				String s = sscanf.nextToken(", ");
-    				textAreaSub_1.setText(textAreaSub_1.getText() +s);
+    				textAreaSub_1.setText(textAreaSub_1.getText() +s+"\n");
     				System.out.println(s);
 			         //revalidate();repaint();
-    			}
+    			//}
 			long endTime = System.nanoTime();
-			textAreaSub_1.setText(textAreaSub_1.getText() +"Execution time: " + (endTime - startTime) + " nanoseconds");
+			textAreaSub_1.setText(textAreaSub_1.getText() +"Execution time: " + (endTime - startTime) + " nanoseconds"+"\n");
 			System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
-	         //revalidate();repaint();
+	         revalidate();repaint();
             }
 			}catch(Exception e){
 				e.printStackTrace();
@@ -426,14 +436,16 @@ public class PubSubUI extends JFrame {
 	}
 	public void getSubscriptionEncrypted(String sub){
 		try{
-			ZContext contexts = new ZContext();
-			ZContext contextr = new ZContext();
+			if (contextse==null) {
+			contextse = new ZContext();
+			contextre = new ZContext();
+			}
 			long startTime = System.nanoTime();
 			//connectionSub = getConnectionSub(contexts);
-			connectionSub = contexts.createSocket(SocketType.SUB);
+			connectionSub = contextse.createSocket(SocketType.SUB);
 	        connectionSub.connect("tcp://localhost:5556");
 			//connectionReq = getConnectionReq(context
-			connectionReq = contextr.createSocket(SocketType.REQ);
+			connectionReq = contextre.createSocket(SocketType.REQ);
             connectionReq.connect("tcp://localhost:5555");
 			String request = "GET ".concat(sub);
 			connectionReq.send(request.getBytes(ZMQ.CHARSET), 0);
@@ -441,7 +453,7 @@ public class PubSubUI extends JFrame {
 			String key = connectionReq.recvStr(0).trim();
 			String encryptedSub = new String(encrypt(key,sub));
 			connectionSub.subscribe(encryptedSub.getBytes(ZMQ.CHARSET));
-			textAreaSub_1.setText(textAreaSub_1.getText() +"Encryption Key: "+key);
+			textAreaSub_1.setText(textAreaSub_1.getText() +"Encryption Key: "+key+"\n");
 			System.out.println("Encryption Key: "+key);
 	         //revalidate();repaint();
 
@@ -456,7 +468,7 @@ public class PubSubUI extends JFrame {
 					String[] arr = string.split(" ", 2);
 					String encryptedPub = arr[0].trim();
 					String encryptedInfo = arr[1].trim();
-					textAreaSub_1.setText(textAreaSub_1.getText() +encryptedPub);
+					textAreaSub_1.setText(textAreaSub_1.getText() +encryptedPub+"\n");
 					System.out.println(encryptedPub);
 			         //revalidate();repaint();
 
@@ -470,11 +482,11 @@ public class PubSubUI extends JFrame {
 						//System.out.println("Decrypted String: "+decryptedString);
 						//byte[] token = sscanf.nextToken().getBytes();
 						//System.out.println("token:"+token);
-					textAreaSub_1.setText(textAreaSub_1.getText() +encryptedInfo.getBytes().length);
+					textAreaSub_1.setText(textAreaSub_1.getText() +encryptedInfo.getBytes().length+"\n");
 					System.out.println(encryptedInfo.getBytes().length);
 			         //revalidate();repaint();
 					String decryptedString = decrypt(encryptedInfo.getBytes(),key);
-					textAreaSub_1.setText(textAreaSub_1.getText() +"Decrypted String: "+decryptedString);
+					textAreaSub_1.setText(textAreaSub_1.getText() +"Decrypted String: "+decryptedString+"\n");
 					System.out.println("Decrypted String: "+decryptedString);
 			         //revalidate();repaint();
 						
@@ -484,16 +496,16 @@ public class PubSubUI extends JFrame {
 		
 					connectionReq.send(ack.getBytes(ZMQ.CHARSET), 0);
 					byte[] recv = connectionReq.recv(0);
-					textAreaSub_1.setText(textAreaSub_1.getText() +recv);	
+					textAreaSub_1.setText(textAreaSub_1.getText() +recv+"\n");	
 					System.out.println(recv);
 			         //revalidate();repaint();
 					long endTime = System.nanoTime();
-					textAreaSub_1.setText(textAreaSub_1.getText() +"Execution time: " + (endTime - startTime) + " nanoseconds");
+					textAreaSub_1.setText(textAreaSub_1.getText() +"Execution time: " + (endTime - startTime) + " nanoseconds"+"\n");
 					System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
-			         //revalidate();repaint();
+			         revalidate();repaint();
 			 	}
-				contexts.close();
-				contextr.close();
+				//contextse.close();
+				//contextre.close();
 			}catch(Exception e) {
 			 e.printStackTrace();
 		 }	
@@ -653,7 +665,38 @@ public class PubSubUI extends JFrame {
 								setHost(txtHost.getText());
 								setPort(txtPort.getText());
 								publish(txtTopic.getText(), textAreaMessage.getText());
-						         //revalidate();repaint();
+						         revalidate();repaint();
+								/*try{
+									ZContext context = new ZContext();
+									if (connectionPub==null){
+										//connectionPub = getConnectionPub(pub,context);
+										connectionPub = context.createSocket(SocketType.PUB);
+								        // connectionPub.connect("tcp://"+host+":"+port);
+								        connectionPub.bind("tcp://*:5556");
+								        String ipc = "ipc://test";
+								        //connectionPub.bind("ipc://"+pub);
+								        connectionPub.bind(ipc);
+									}
+							       // while (!Thread.currentThread().isInterrupted()) {
+							    		long startTime = System.nanoTime();
+							    		String update = String.format(
+							                    "%s %s", txtTopic.getText(), textAreaMessage.getText()
+							                );
+							    		System.out.println(update);
+							    		textAreaPub_1.setText(textAreaPub_1.getText() + update);
+								        connectionPub.send(update, 0);
+								        long endTime = System.nanoTime();
+								        textAreaPub_1.setText(textAreaPub_1.getText() + "Execution time: " + (endTime - startTime) + " nanoseconds");
+								        System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+								        contentPane.revalidate();
+								        contentPane.repaint();
+								        //revalidate();repaint();
+										Thread.sleep(1000);
+							        //}
+							        context.close();
+									}catch(Exception ex){
+										ex.printStackTrace();
+									}*/
 							}
 							else {
 								//setSubTerminal(textAreaSub_1);
