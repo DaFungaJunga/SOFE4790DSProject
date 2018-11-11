@@ -4,6 +4,7 @@ import java.util.StringTokenizer;
 import java.security.Key;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.swing.JTextArea;
 
 import org.apache.commons.codec.binary.Base64;
 import org.zeromq.SocketType;
@@ -20,12 +21,16 @@ public class Pub {
 	String port=null; 
 	ZMQ.Socket connectionPub=null;
 	ZMQ.Socket connectionRep=null;
+	JTextArea textAreaPub;
 	//ZContext context = new ZContext();
 	public void setHost(String h){
 		host = h;
 	}
 	public void setPort(String p){
 		port = p;
+	}
+	public void setPubTerminal(JTextArea terminal) {
+		textAreaPub = terminal;
 	}
 	public ZMQ.Socket getConnectionPub(String pub,ZContext context){
 		try {
@@ -70,7 +75,8 @@ public class Pub {
                 );
 	        connectionPub.send(update, 0);
 	        long endTime = System.nanoTime();
-			System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+	        textAreaPub.setText(textAreaPub.getText() + "Execution time: " + (endTime - startTime) + " nanoseconds");
+	        
 			Thread.sleep(1000);
         }
         context.close();
@@ -91,16 +97,14 @@ public class Pub {
 	        //connectionPub.bind("ipc://"+pub);
 	        connectionPub.bind(ipc);
 		}
-		System.out.println("2");
 
 		String key = applySha256(pub);
 		String encryptedInfo = new String(encrypt(key,info));
 		String test = decrypt(encryptedInfo.getBytes(),key);
 		String encryptedPub = new String(encrypt(key,pub));
-		System.out.println(encrypt(key,pub).length);
-		System.out.println("3");
+		textAreaPub.setText(textAreaPub.getText() +encrypt(key,pub).length);
         addTopic(pub,contextp,key);
-        System.out.println(key);
+        textAreaPub.setText(textAreaPub.getText() +key);
 		new Thread(new Runnable() {
 		    @Override public void run() {
 		    	recieveMessage(pub);		        
@@ -115,7 +119,7 @@ public class Pub {
 			//System.out.println("4");
 
 	        connectionPub.send(update, 0);
-			System.out.println(update);
+	        textAreaPub.setText(textAreaPub.getText() +update);
 
 	        long endTime = System.nanoTime();
 	        //recieveMessage(pub,contextr);
@@ -205,18 +209,18 @@ public class Pub {
 			connectionRep = contextr.createSocket(SocketType.REP);
 	        connectionRep.bind("tcp://*:5555");
 			while (!Thread.currentThread().isInterrupted()) {
-    			System.out.println("waiting to recieve message");
+				textAreaPub.setText(textAreaPub.getText() +"waiting to recieve message");
 	            byte[] byteString = connectionRep.recv(0);
 	            String string = new String(byteString);
-    			System.out.println("received String:"+string);
+	            textAreaPub.setText(textAreaPub.getText() +"received String:"+string);
 	            StringTokenizer sscanf = new StringTokenizer(string, " ");
 	            String str = sscanf.nextToken();
-    			System.out.println("received Str:"+str);
+	            textAreaPub.setText(textAreaPub.getText() +"received Str:"+str);
 
 	            if (str.equals("GET")){
-	            	System.out.println("Recieved GET");
+	            	textAreaPub.setText(textAreaPub.getText() +"Recieved GET");
 	            	String sub = sscanf.nextToken();
-	    			System.out.println("received Str:"+sub);
+	            	textAreaPub.setText(textAreaPub.getText() +"received Str:"+sub);
 	            	String response = "NULL";
 	            	for(int i=0;i<topics.size();i++){
 	            		if(topics.get(i).get(0).equals(sub)){
@@ -234,10 +238,10 @@ public class Pub {
 	            		}
 	            	}
 	            	connectionRep.send(response.getBytes(ZMQ.CHARSET), 0);
-	            	System.out.println("Sending key "+response);
+	            	textAreaPub.setText(textAreaPub.getText() +"Sending key "+response);
 	            }
 	            if (str.equals("ACK")){
-	            	System.out.println("Recieved ACK");
+	            	textAreaPub.setText(textAreaPub.getText() +"Recieved ACK");
 	            	String sub = sscanf.nextToken();
 	            	for(int i=0;i<topics.size();i++){
 	            		if(topics.get(i).get(0).equals(sub)){
@@ -251,7 +255,7 @@ public class Pub {
 	            	}
 	            } 	
 	            if(str.equals("ADD")){
-	            	System.out.println("Recieved ADD");
+	            	textAreaPub.setText(textAreaPub.getText() +"Recieved ADD");
 	            	String sub = sscanf.nextToken();
 	            	for(int i=0;i<topics.size();i++){
 	            		if(topics.get(i).get(0).equals(sub)){
@@ -264,7 +268,7 @@ public class Pub {
 	            	}
 	            }
 	            if(str.equals("REMOVE")){
-	            	System.out.println("Recieved ADD");
+	            	textAreaPub.setText(textAreaPub.getText() +"Recieved ADD");
 	            	String sub = sscanf.nextToken();
 	            	for(int i=0;i<topics.size();i++){
 	            		if(topics.get(i).get(0).equals(sub)){
@@ -273,7 +277,7 @@ public class Pub {
 	            		}
 	            	}
 	            }
-	            System.out.println( "Received " + string);
+	            textAreaPub.setText(textAreaPub.getText() + "Received " + string);
 	            Thread.sleep(1000); //  Do some 'work'
 	        }
 			contextr.close();
