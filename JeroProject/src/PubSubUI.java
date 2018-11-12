@@ -36,6 +36,8 @@ public class PubSubUI extends JFrame {
 	private JTextField txtPort;
 	ZContext contextp;
 	ZContext contextpe;
+	String subKey;
+	String pubKey;
 	
 	ZContext contextr=null;
 	ZContext contexts =null;
@@ -149,16 +151,16 @@ public class PubSubUI extends JFrame {
 	        connectionPub.bind(ipc);
 		}
 
-		String key = applySha256(pub);
-		String encryptedInfo = new String(encrypt(key,info));
-		String test = decrypt(encryptedInfo.getBytes(),key);
-		String encryptedPub = new String(encrypt(key,pub));
-		textAreaPub_1.setText(textAreaPub_1.getText() +encrypt(key,pub).length+"\n");
-		System.out.println(encrypt(key,pub).length);
+		pubKey = applySha256(pub);
+		String encryptedInfo = new String(encrypt(pubKey,info));
+		String test = decrypt(encryptedInfo.getBytes(),pubKey);
+		String encryptedPub = new String(encrypt(pubKey,pub));
+		textAreaPub_1.setText(textAreaPub_1.getText() +encrypt(pubKey,pub).length+"\n");
+		System.out.println(encrypt(pubKey,pub).length);
 
         //revalidate();repaint();
-        addTopic(pub,contextpe,key);
-        textAreaPub_1.setText(textAreaPub_1.getText() +key+"\n");
+        addTopic(pub,contextpe,pubKey);
+        textAreaPub_1.setText(textAreaPub_1.getText() +pubKey+"\n");
         //revalidate();repaint();
 		new Thread(new Runnable() {
 		    @Override public void run() {
@@ -263,11 +265,12 @@ public class PubSubUI extends JFrame {
 		try{
 			if (contextr==null) {
 			contextr = new ZContext();
-			}
-
 			//connectionRep = getConnectionPub(pub,contextr);
 			connectionRep = contextr.createSocket(SocketType.REP);
 	        connectionRep.bind("tcp://*:5555");
+			}
+
+			
 			while (!Thread.currentThread().isInterrupted()) {
 				textAreaPub_1.setText(textAreaPub_1.getText() +"waiting to recieve message"+"\n");
 	            System.out.println("waiting to recieve message");
@@ -439,8 +442,8 @@ public class PubSubUI extends JFrame {
 			if (contextse==null) {
 			contextse = new ZContext();
 			contextre = new ZContext();
-			}
-			long startTime = System.nanoTime();
+			
+			
 			//connectionSub = getConnectionSub(contexts);
 			connectionSub = contextse.createSocket(SocketType.SUB);
 	        connectionSub.connect("tcp://localhost:5556");
@@ -450,14 +453,14 @@ public class PubSubUI extends JFrame {
 			String request = "GET ".concat(sub);
 			connectionReq.send(request.getBytes(ZMQ.CHARSET), 0);
 
-			String key = connectionReq.recvStr(0).trim();
-			String encryptedSub = new String(encrypt(key,sub));
+			subKey = connectionReq.recvStr(0).trim();
+			String encryptedSub = new String(encrypt(subKey,sub));
 			connectionSub.subscribe(encryptedSub.getBytes(ZMQ.CHARSET));
-			textAreaSub_1.setText(textAreaSub_1.getText() +"Encryption Key: "+key+"\n");
-			System.out.println("Encryption Key: "+key);
-	         //revalidate();repaint();
-
-
+			textAreaSub_1.setText(textAreaSub_1.getText() +"Encryption Key: "+subKey+"\n");
+			System.out.println("Encryption Key: "+subKey);
+	         revalidate();repaint();
+			}
+			long startTime = System.nanoTime();
 			 //while (!Thread.currentThread ().isInterrupted ()){
 					byte[] stringBytes = connectionSub.recv(0);
 					//System.out.println(stringBytes);
@@ -470,7 +473,7 @@ public class PubSubUI extends JFrame {
 					String encryptedInfo = arr[1].trim();
 					textAreaSub_1.setText(textAreaSub_1.getText() +encryptedPub+"\n");
 					System.out.println(encryptedPub);
-			         //revalidate();repaint();
+			         revalidate();repaint();
 
 					//System.out.println("Before trim"+encryptedInfo);
 
@@ -485,7 +488,7 @@ public class PubSubUI extends JFrame {
 					textAreaSub_1.setText(textAreaSub_1.getText() +encryptedInfo.getBytes().length+"\n");
 					System.out.println(encryptedInfo.getBytes().length);
 			         //revalidate();repaint();
-					String decryptedString = decrypt(encryptedInfo.getBytes(),key);
+					String decryptedString = decrypt(encryptedInfo.getBytes(),subKey);
 					textAreaSub_1.setText(textAreaSub_1.getText() +"Decrypted String: "+decryptedString+"\n");
 					System.out.println("Decrypted String: "+decryptedString);
 			         //revalidate();repaint();
