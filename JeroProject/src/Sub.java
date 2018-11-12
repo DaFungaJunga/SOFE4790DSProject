@@ -73,13 +73,13 @@ public class Sub {
             while (!Thread.currentThread ().isInterrupted ()) {
     			long startTime = System.nanoTime();
             	String string = connectionSub.recvStr(0).trim();
-            	textAreaSub.setText(textAreaSub.getText() +"received String:"+string);
+            	System.out.println("received String:"+string);
     			StringTokenizer sscanf = new StringTokenizer(string, " ");
     			while (sscanf.hasMoreTokens()) {
-    				textAreaSub.setText(textAreaSub.getText() +sscanf.nextToken(", "));
+    				System.out.println(sscanf.nextToken(", "));
     			}
 			long endTime = System.nanoTime();
-			textAreaSub.setText(textAreaSub.getText() +"Execution time: " + (endTime - startTime) + " nanoseconds");
+			System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
             }
 			}catch(Exception e){
 				e.printStackTrace();
@@ -102,7 +102,7 @@ public class Sub {
 			String key = connectionReq.recvStr(0).trim();
 			String encryptedSub = new String(encrypt(key,sub));
 			connectionSub.subscribe(encryptedSub.getBytes(ZMQ.CHARSET));
-			textAreaSub.setText(textAreaSub.getText() +"Encryption Key: "+key);
+			System.out.println("Encryption Key: "+key);
 
 			 while (!Thread.currentThread ().isInterrupted ()){
 					byte[] stringBytes = connectionSub.recv(0);
@@ -114,7 +114,7 @@ public class Sub {
 					String[] arr = string.split(" ", 2);
 					String encryptedPub = arr[0].trim();
 					String encryptedInfo = arr[1].trim();
-					textAreaSub.setText(textAreaSub.getText() +encryptedPub);
+					System.out.println(encryptedPub);
 					//System.out.println("Before trim"+encryptedInfo);
 
 				    //encryptedInfo = encryptedInfo.replaceAll("^\\s+", "");
@@ -125,18 +125,18 @@ public class Sub {
 						//System.out.println("Decrypted String: "+decryptedString);
 						//byte[] token = sscanf.nextToken().getBytes();
 						//System.out.println("token:"+token);
-					textAreaSub.setText(textAreaSub.getText() +encryptedInfo.getBytes().length);
+					System.out.println(encryptedInfo.getBytes().length);
 					String decryptedString = decrypt(encryptedInfo.getBytes(),key);
-					textAreaSub.setText(textAreaSub.getText() +"Decrypted String: "+decryptedString);
+					System.out.println("Decrypted String: "+decryptedString);
 						
 			            //System.out.println(sscanf.nextToken(", "));
 			     
 					String ack = "ACK ".concat(sub);
 		
 					connectionReq.send(ack.getBytes(ZMQ.CHARSET), 0);
-					textAreaSub.setText(textAreaSub.getText() +connectionReq.recv(0));		
+					System.out.println(connectionReq.recv(0));		
 					long endTime = System.nanoTime();
-					textAreaSub.setText(textAreaSub.getText() +"Execution time: " + (endTime - startTime) + " nanoseconds");
+					System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
 			 	}
 				contexts.close();
 				contextr.close();
