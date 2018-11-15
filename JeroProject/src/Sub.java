@@ -79,7 +79,7 @@ public class Sub {
     				System.out.println(sscanf.nextToken(", "));
     			}
 			long endTime = System.nanoTime();
-			System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+			System.out.println("Subscriber Execution time: " + (endTime - startTime) + " nanoseconds");
             }
 			}catch(Exception e){
 				e.printStackTrace();
@@ -89,7 +89,6 @@ public class Sub {
 		try{
 			ZContext contexts = new ZContext();
 			ZContext contextr = new ZContext();
-			long startTime = System.nanoTime();
 			//connectionSub = getConnectionSub(contexts);
 			connectionSub = contexts.createSocket(SocketType.SUB);
 	        connectionSub.connect("tcp://localhost:5556");
@@ -105,6 +104,7 @@ public class Sub {
 			System.out.println("Encryption Key: "+key);
 
 			 while (!Thread.currentThread ().isInterrupted ()){
+					long startTime = System.nanoTime();
 					byte[] stringBytes = connectionSub.recv(0);
 					//System.out.println(stringBytes);
 					String string = new String(stringBytes);
@@ -136,7 +136,7 @@ public class Sub {
 					connectionReq.send(ack.getBytes(ZMQ.CHARSET), 0);
 					System.out.println(connectionReq.recv(0));		
 					long endTime = System.nanoTime();
-					System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+					System.out.println("Encrypted Subscriber Execution Time: " + (endTime - startTime) + " nanoseconds");
 			 	}
 				contexts.close();
 				contextr.close();

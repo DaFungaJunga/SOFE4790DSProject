@@ -75,7 +75,7 @@ public class Pub {
                 );
 	        connectionPub.send(update, 0);
 	        long endTime = System.nanoTime();
-	        System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+	        System.out.println("Publisher Execution time: " + (endTime - startTime) + " nanoseconds");
 	        
 			Thread.sleep(1000);
         }
@@ -123,7 +123,7 @@ public class Pub {
 
 	        long endTime = System.nanoTime();
 	        //recieveMessage(pub,contextr);
-			//System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+			System.out.println("Encryption Publisher Execution Time: " + (endTime - startTime) + " nanoseconds");
 			Thread.sleep(10000);
 		}
 		contextp.close();
@@ -211,6 +211,7 @@ public class Pub {
 			while (!Thread.currentThread().isInterrupted()) {
 				System.out.println("waiting to recieve message");
 	            byte[] byteString = connectionRep.recv(0);
+				long startTime = System.nanoTime();
 	            String string = new String(byteString);
 	            System.out.println("received String:"+string);
 	            StringTokenizer sscanf = new StringTokenizer(string, " ");
@@ -277,7 +278,9 @@ public class Pub {
 	            		}
 	            	}
 	            }
+		        long endTime = System.nanoTime();
 	            System.out.println("Received " + string);
+				System.out.println("Message Processing Time Execution Time: " + (endTime - startTime) + " nanoseconds");
 	            Thread.sleep(1000); //  Do some 'work'
 	        }
 			contextr.close();

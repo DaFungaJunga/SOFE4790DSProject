@@ -126,8 +126,8 @@ public class PubSubUI extends JFrame {
     		textAreaPub_1.setText(textAreaPub_1.getText() + update);
 	        connectionPub.send(update, 0);
 	        long endTime = System.nanoTime();
-	        textAreaPub_1.setText(textAreaPub_1.getText() + "Execution time: " + (endTime - startTime) + " nanoseconds\n");
-	        System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+	        textAreaPub_1.setText(textAreaPub_1.getText() + "Publisher Execution time: " + (endTime - startTime) + " nanoseconds\n");
+	        System.out.println("Publisher Execution time: " + (endTime - startTime) + " nanoseconds");
 	        textAreaPub_1.revalidate();textAreaPub_1.repaint();
 	        repaint();
 			//Thread.sleep(1000);
@@ -176,14 +176,16 @@ public class PubSubUI extends JFrame {
 			//System.out.println("4");
 
 	        connectionPub.send(update, 0);
+	        long endTime = System.nanoTime();
 	        textAreaPub_1.setText(textAreaPub_1.getText() +update+"\n");
 	        System.out.println(update);
 	         //revalidate();repaint();
 
 
-	        long endTime = System.nanoTime();
 	        //recieveMessage(pub,contextr);
-			System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+			System.out.println("Encrypted Publisher Execution time: " + (endTime - startTime) + " nanoseconds");
+	        textAreaPub_1.setText(textAreaPub_1.getText() +"Encrypted Publisher Execution time: " + (endTime - startTime) +"\n");
+
 			//Thread.sleep(10000);
 		//}
 		//contextp.close();
@@ -275,6 +277,7 @@ public class PubSubUI extends JFrame {
 				textAreaPub_1.setText(textAreaPub_1.getText() +"waiting to recieve message"+"\n");
 	            System.out.println("waiting to recieve message");
 	            byte[] byteString = connectionRep.recv(0);
+    			long startTime = System.nanoTime();
 	            String string = new String(byteString);
 	            textAreaPub_1.setText(textAreaPub_1.getText() +"received String:"+string+"\n");
 	            System.out.println("received String:"+string);
@@ -359,7 +362,9 @@ public class PubSubUI extends JFrame {
 	            		}
 	            	}
 	            }
+				long endTime = System.nanoTime();
 	            textAreaPub_1.setText(textAreaPub_1.getText() + "Received " + string+"\n");
+				textAreaPub_1.setText(textAreaPub_1.getText() +"Message Processing Time Execution Time: " + (endTime - startTime) + " nanoseconds"+"\n");
 	            System.out.println( "Received " + string);
 		         revalidate();repaint();
 	            Thread.sleep(1000); //  Do some 'work'
@@ -429,8 +434,8 @@ public class PubSubUI extends JFrame {
 			         //revalidate();repaint();
     			//}
 			long endTime = System.nanoTime();
-			textAreaSub_1.setText(textAreaSub_1.getText() +"Execution time: " + (endTime - startTime) + " nanoseconds"+"\n");
-			System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+			textAreaSub_1.setText(textAreaSub_1.getText() +"Subscriber Execution time: " + (endTime - startTime) + " nanoseconds"+"\n");
+			System.out.println("Subscriber Execution time: " + (endTime - startTime) + " nanoseconds");
 	         revalidate();repaint();
             }
 			}catch(Exception e){
@@ -503,8 +508,8 @@ public class PubSubUI extends JFrame {
 					System.out.println(recv);
 			         //revalidate();repaint();
 					long endTime = System.nanoTime();
-					textAreaSub_1.setText(textAreaSub_1.getText() +"Execution time: " + (endTime - startTime) + " nanoseconds"+"\n");
-					System.out.println("Execution time: " + (endTime - startTime) + " nanoseconds");
+					textAreaSub_1.setText(textAreaSub_1.getText() +"Encrypted Subscriber Execution time: " + (endTime - startTime) + " nanoseconds"+"\n");
+					System.out.println("Encrypted Subscriber Execution time: " + (endTime - startTime) + " nanoseconds");
 			         revalidate();repaint();
 			 	//}
 				//contextse.close();
