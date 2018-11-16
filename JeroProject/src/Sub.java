@@ -12,24 +12,35 @@ import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
 public class Sub {
-	/*
-	 * use add/remove sub
-	 */
 	ArrayList<String> subscriptions = new ArrayList<String>();
 	String host=null;
 	String port=null; 
 	ZMQ.Socket connectionSub=null;
 	ZMQ.Socket connectionReq=null;
 	JTextArea textAreaSub;
+	/**
+	 * Set host address for socket
+	 * 
+	 * @param h the host address
+	 */
 	public void setHost(String h){
 		host = h;
 	}
+	/**
+	 * Set the port address for socket
+	 * 
+	 * @param p the port address
+	 */
 	public void setPort(String p){
 		port = p;
 	}
-	public void setSubTerminal(JTextArea terminal) {
-		textAreaSub = terminal;
-	}
+	/**
+	 * Create the subscriber connection with the given context
+	 * 
+	 * For testing purposes, host = localhost and port = 5556
+	 * @param context the ZeroMQ context for a process
+	 * @return the connection, null if connection could not be established with the given info
+	 */
 	public ZMQ.Socket getConnectionSub(ZContext context){
 		if(host==null){
 			host = "localhost";
@@ -46,6 +57,13 @@ public class Sub {
 			return null;
 		}
 	}
+	/**
+	 * Create the request connection with the given context
+	 * 
+	 * For testing purposes, host = localhost and port = 5556
+	 * @param context the ZeroMQ context for a process
+	 * @return the connection, null if connection could not be established with the given info
+	 */
 	public ZMQ.Socket getConnectionReq(ZContext context){
 		if(host==null){
 			host = "localhost";
@@ -62,6 +80,11 @@ public class Sub {
 			return null;
 		}
 	}
+	/**
+	 * This method waits to receive a message from a publisher that they subscribe to 
+	 * 
+	 * @param sub the topic they would like to subscribe to 
+	 */
 	public void getSubscription(String sub){
 		try{
 			ZContext context = new ZContext();
@@ -85,6 +108,12 @@ public class Sub {
 				e.printStackTrace();
 		}
 	}
+	/**
+	 * This method waits to receive the key in order to subscribe to a published topic
+	 * When it receives a message, it sends an ACK to the Publisher
+	 * 
+	 * @param sub the topic to be subscribed to
+	 */
 	public void getSubscriptionEncrypted(String sub){
 		try{
 			ZContext contexts = new ZContext();
@@ -144,19 +173,36 @@ public class Sub {
 			 e.printStackTrace();
 		 }	
 	}
-	
+	/**
+	 * This method adds the subscriber to the publisher's subscriber list
+	 * 
+	 * @param sub the topic to be subscribed to
+	 * @param context the ZeroMQ context for a process
+	 */
 	public void addSubscription(String sub,ZContext context){
 		subscriptions.add(sub);
 		String request = "ADD ".concat(sub);
 		connectionReq = getConnectionReq(context);
 		connectionReq.send(request.getBytes(ZMQ.CHARSET), 0);
 	}
+	/**
+	 * This method removes the subscriber to the publisher's subscriber list
+	 * 
+	 * @param sub the topic to be subscribed to
+	 * @param context the ZeroMQ context for a pro
+	 */
 	public void removeSubscription(String sub,ZContext context){
 		subscriptions.remove(sub);
 		String request = "REMOVE ".concat(sub);
 		connectionReq = getConnectionReq(context);
 		connectionReq.send(request.getBytes(ZMQ.CHARSET), 0);
 	}
+	/**
+	 * This method encrypts a given string based on a given key
+	 * @param key the encryption key
+	 * @param text the string to be encrypted
+	 * @return a encrypted byte array
+	 */
 	public byte[] encrypt(String key, String text) {
 		byte[] encrypted = null;
 		byte[] encryptedByteValue = null;
@@ -172,6 +218,12 @@ public class Sub {
 		}
 		return encryptedByteValue;
 	}
+	/**
+	 * This method decrypts a given string based on a given key
+	 * @param encrypted a byte array that is to be decrypted
+	 * @param key the encryption key
+	 * @return a ddecrypted string
+	 */
 	public String decrypt(byte[]encrypted,String key) {
 		String decrypted = null;
 		try {

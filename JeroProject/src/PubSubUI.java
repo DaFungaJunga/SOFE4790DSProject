@@ -71,16 +71,31 @@ public class PubSubUI extends JFrame {
 	 * Pub methods
 	 * 
 	 */
-	
+	/**
+	 * Set host address for socket
+	 * 
+	 * @param h the host address
+	 */
 	public void setHost(String h){
 		host = h;
 	}
+	/**
+	 * Set the port address for socket
+	 * 
+	 * @param p the port address
+	 */
 	public void setPort(String p){
 		port = p;
 	}
-	/*public void setPubTerminal(JTextArea terminal) {
-		textAreaPub_1 = terminal;
-	}*/
+	/**
+	 * Create the publisher connection with the given context
+	 * 
+	 * For testing purposes, host = * and port = 5556
+	 * 
+	 * @param pub the topic user is publishing to
+	 * @param context the ZeroMQ context for a process
+	 * @return the connection, null if connection could not be established with the given info
+	 */
 	public ZMQ.Socket getConnectionPub(String pub,ZContext context){
 		try {
 			connectionPub = context.createSocket(SocketType.PUB);
@@ -95,6 +110,11 @@ public class PubSubUI extends JFrame {
 			return null;
 		}
 	}
+	/**
+	 * Create the Reply connection with a given context
+	 * @param context the ZeroMQ context for a process
+	 * @return the connection, null if connection could not be established with the given info
+	 */
 	public ZMQ.Socket getConnectionRep(ZContext context){
 		try{
 			connectionPub = context.createSocket(SocketType.REP);
@@ -105,6 +125,14 @@ public class PubSubUI extends JFrame {
 			return null;
 		}
 	}
+	/**
+	 * Method to periodically sent messages to subscribers on a given topic
+	 * This method is the regular implementation of the Pub-Sub Arch
+	 * 
+	 * For testing purposes, host = * and port = 5556
+	 * @param pub the topic to be published to
+	 * @param info the message that will be published to a topic
+	 */
 	public void publish(String pub,String info){
 		try{
 		if (connectionPub==null){
@@ -137,6 +165,14 @@ public class PubSubUI extends JFrame {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * This method uses encryption on the topic and message being sent.
+	 * Key is generated based on topic
+	 * A thread is created to recieve messages from the subscribers
+	 * 
+	 * @param pub the topic to be published to
+	 * @param info the message that will be published to a top
+	 */
 	public void publishEncrypted(String pub,String info){
 		try{
 		if (connectionPub==null){
@@ -193,6 +229,14 @@ public class PubSubUI extends JFrame {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * This methods adds a given topic to an array 
+	 * if there is not an existing entry, method will create a new one
+	 * topics array keeps track of meaningful information on publications
+	 * @param pub the topic user is publishing to
+	 * @param context the ZeroMQ context for a process
+	 * @param key the encryption key
+	 */
 	public void addTopic(String pub,ZContext context,String key){
 		for(int i=0;i<topics.size();i++){
     		if(topics.get(i).get(0)==pub){
@@ -209,6 +253,11 @@ public class PubSubUI extends JFrame {
 		
 		topics.add(topic);
 	}
+	/**
+	 * This method applies Secure Hash Algorithm to a given string
+	 * @param input a given string to be hashed
+	 * @return hashed string
+	 */
 	public static String applySha256(String input){
 
         try {
@@ -231,6 +280,12 @@ public class PubSubUI extends JFrame {
             throw new RuntimeException(e);
         }
     }
+	/**
+	 * This method encrypts a given string based on a given key
+	 * @param key the encryption key
+	 * @param text the string to be encrypted
+	 * @return a encrypted byte array
+	 */
 	public byte[] encrypt(String key, String text) {
 		byte[] encrypted = null;
 		byte[] encryptedByteValue = null;
@@ -246,6 +301,12 @@ public class PubSubUI extends JFrame {
 		}
 		return encryptedByteValue;
 	}
+	/**
+	 * This method decrypts a given string based on a given key
+	 * @param encrypted a byte array that is to be decrypted
+	 * @param key the encryption key
+	 * @return a ddecrypted string
+	 */
 	public String decrypt(byte[]encrypted,String key) {
 		String decrypted = null;
 		try {
@@ -259,6 +320,12 @@ public class PubSubUI extends JFrame {
 		}
 		return decrypted;
 	}
+	/**
+	 * This method waits to recieve a message from a subscriber and handles it accordingly
+	 * It can recieve get,ack, add, and remove
+	 * 
+	 * @param pub the topic that is being published to
+	 */
 	public void recieveMessage(String pub){
 		/*	
 		 *   topics: 0:topic name, 1: subscribers count, 2: current publication acknowledgement count, 
@@ -377,9 +444,13 @@ public class PubSubUI extends JFrame {
 	/**
 	 * Sub methods
 	 */
-	/*public void setSubTerminal(JTextArea terminal) {
-		textAreaSub_1 = terminal;
-	}*/
+	/**
+	 * Create the subscriber connection with the given context
+	 * 
+	 * For testing purposes, host = localhost and port = 5556
+	 * @param context the ZeroMQ context for a process
+	 * @return the connection, null if connection could not be established with the given info
+	 */
 	public ZMQ.Socket getConnectionSub(ZContext context){
 		if(host==null){
 			host = "localhost";
@@ -396,6 +467,13 @@ public class PubSubUI extends JFrame {
 			return null;
 		}
 	}
+	/**
+	 * Create the request connection with the given context
+	 * 
+	 * For testing purposes, host = localhost and port = 5556
+	 * @param context the ZeroMQ context for a process
+	 * @return the connection, null if connection could not be established with the given info
+	 */
 	public ZMQ.Socket getConnectionReq(ZContext context){
 		if(host==null){
 			host = "localhost";
@@ -412,6 +490,11 @@ public class PubSubUI extends JFrame {
 			return null;
 		}
 	}
+	/**
+	 * This method waits to receive a message from a publisher that they subscribe to 
+	 * 
+	 * @param sub the topic they would like to subscribe to 
+	 */
 	public void getSubscription(String sub){
 		try{
 			if (connectionSub==null){
@@ -442,6 +525,12 @@ public class PubSubUI extends JFrame {
 				e.printStackTrace();
 		}
 	}
+	/**
+	 * This method waits to receive the key in order to subscribe to a published topic
+	 * When it receives a message, it sends an ACK to the Publisher
+	 * 
+	 * @param sub the topic to be subscribed to
+	 */
 	public void getSubscriptionEncrypted(String sub){
 		try{
 			if (contextse==null) {
@@ -518,13 +607,24 @@ public class PubSubUI extends JFrame {
 			 e.printStackTrace();
 		 }	
 	}
-	
+	/**
+	 * This method adds the subscriber to the publisher's subscriber list
+	 * 
+	 * @param sub the topic to be subscribed to
+	 * @param context the ZeroMQ context for a process
+	 */
 	public void addSubscription(String sub,ZContext context){
 		subscriptions.add(sub);
 		String request = "ADD ".concat(sub);
 		connectionReq = getConnectionReq(context);
 		connectionReq.send(request.getBytes(ZMQ.CHARSET), 0);
 	}
+	/**
+	 * This method removes the subscriber to the publisher's subscriber list
+	 * 
+	 * @param sub the topic to be subscribed to
+	 * @param context the ZeroMQ context for a pro
+	 */
 	public void removeSubscription(String sub,ZContext context){
 		subscriptions.remove(sub);
 		String request = "REMOVE ".concat(sub);
@@ -550,6 +650,18 @@ public class PubSubUI extends JFrame {
 	
 	/**
 	 * Create the frame.
+	 * 
+	 * Create a UI which the user can input
+	 * topic
+	 * host
+	 * port
+	 * message
+	 * 
+	 * User can choose Regular Pub/Sub or New Pub/Sub
+	 * One method per window
+	 * Regular and New do not mix
+	 * 
+	 * Output is redirected to Pub/Sub results view as well as the debug terminal
 	 */
 	public PubSubUI() {
 		
