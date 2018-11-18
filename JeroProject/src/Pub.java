@@ -161,7 +161,7 @@ public class Pub {
 	        long endTime = System.nanoTime();
 	        //recieveMessage(pub,contextr);
 			System.out.println("Encryption Publisher Execution Time: " + (endTime - startTime) + " nanoseconds");
-			Thread.sleep(10000);
+			Thread.sleep(1000);
 		}
 		contextp.close();
 		}catch(Exception e){
