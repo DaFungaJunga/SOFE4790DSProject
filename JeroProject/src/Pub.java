@@ -178,7 +178,7 @@ public class Pub {
 	 */
 	public void addTopic(String pub,ZContext context,String key){
 		for(int i=0;i<topics.size();i++){
-    		if(topics.get(i).get(0)==pub){
+    		if(topics.get(i).get(0).equals(pub)){
     			topics.get(i).set(2,String.valueOf(0));
     			return;
     		}
@@ -319,6 +319,15 @@ public class Pub {
 
 	            			topics.get(i).set(2,String.valueOf(updateReadCount));
 	            			topics.get(i).set(3,String.valueOf(updateTotalCount));
+	            			/*	
+	            			 *   topics: 0:topic name, 1: subscribers count, 2: current publication acknowledgement count, 
+	            			 *   3: Total Deliveries,  4:key
+	            			 */
+	            			System.out.println("Topic Name: "+topics.get(i).get(0)+"\n");
+	            			System.out.println("Subscriber Count: "+topics.get(i).get(1)+"\n");
+	            			System.out.println("Current Publication Acknowledgement Count: "+topics.get(i).get(2)+"\n");
+	            			System.out.println("Total Deliveries"+topics.get(i).get(3)+"\n");
+	            			System.out.println("Key"+topics.get(i).get(4)+"\n");
 	    	            	connectionRep.send("CON".getBytes(ZMQ.CHARSET), 0);
 	            		}
 	            	}

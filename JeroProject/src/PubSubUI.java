@@ -239,7 +239,7 @@ public class PubSubUI extends JFrame {
 	 */
 	public void addTopic(String pub,ZContext context,String key){
 		for(int i=0;i<topics.size();i++){
-    		if(topics.get(i).get(0)==pub){
+    		if(topics.get(i).get(0).equals(pub)){
     			topics.get(i).set(2,String.valueOf(0));
     			return;
     		}
@@ -398,6 +398,16 @@ public class PubSubUI extends JFrame {
 
 	            			topics.get(i).set(2,String.valueOf(updateReadCount));
 	            			topics.get(i).set(3,String.valueOf(updateTotalCount));
+	            			/*	
+	            			 *   topics: 0:topic name, 1: subscribers count, 2: current publication acknowledgement count, 
+	            			 *   3: Total Deliveries,  4:key
+	            			 */
+	            			textAreaPub_1.setText(textAreaPub_1.getText() +"Topic Name: "+topics.get(i).get(0)+"\n");
+	            			textAreaPub_1.setText(textAreaPub_1.getText() +"Subscriber Count: "+topics.get(i).get(1)+"\n");
+	            			textAreaPub_1.setText(textAreaPub_1.getText() +"Current Publication Acknowledgement Count: "+topics.get(i).get(2)+"\n");
+	            			textAreaPub_1.setText(textAreaPub_1.getText() +"Total Deliveries"+topics.get(i).get(3)+"\n");
+	            			textAreaPub_1.setText(textAreaPub_1.getText() +"Key"+topics.get(i).get(4)+"\n");
+
 	    	            	connectionRep.send("CON".getBytes(ZMQ.CHARSET), 0);
 	            		}
 	            	}
